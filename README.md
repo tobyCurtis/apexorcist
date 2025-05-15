@@ -52,18 +52,15 @@ These changes help align Apex code with secure development practices and help us
 ## How to Use
 
 ### 1. Download the extension
-
 Download the .VSIX file in the dist folder.
 
 ### 2. Install it in VS Code
-
 - Open VS Code, and head to the Extensions side panel (Shift + Command + X)
 - Click the 3 dots at the top right of the panel
 - Select "Install from .VSIX"
 - Target the .VSIX file you downloaded
 
-### 3. Set the Path to Your Apex File
-
+### 3. Run it on your Apex Class or Trigger
 - Open a file you want to Apexorcise
 - Open the Command Pallette (Shift + Command + P)
 - Type "Apexorcise"
