@@ -51,50 +51,22 @@ These changes help align Apex code with secure development practices and help us
 
 ## How to Use
 
-### 1. Download the Script
+### 1. Download the extension
 
-`fixApexCheckmarxFindings.js`
+Download the .VSIX file in the dist folder.
 
-### 2. Add It to the Folder with Your Source
+### 2. Install it in VS Code
 
-Put it in whatever folder you are trying to fix source on, such as:
-
-```
-force-app/main/default/classes
-force-app/main/default/triggers
-```
-
-[Download Script](https://confluenceent.cms.gov/download/attachments/1015896128/fixApexCheckmarxFindings.js?version=1&modificationDate=1747265929067&api=v2)
+- Open VS Code, and head to the Extensions side panel (Shift + Command + X)
+- Click the 3 dots at the top right of the panel
+- Select "Install from .VSIX"
+- Target the .VSIX file you downloaded
 
 ### 3. Set the Path to Your Apex File
 
-At the top of the script, update:
-
-```js
-const filePath = 'cmsMyRequests.cls';
-```
-
-Replace `'cmsMyRequests.cls'` with the path to your file.
-
-### 4. Run the Script
-
-In your terminal, navigate to the folder containing the script and run:
-
-```bash
-node fixApexCheckmarxFindings.js
-```
-
-### 5. Output
-
-On successful execution, you'll see something like:
-
-```
-cmsMyRequests.cls updated:
-  • WITH USER_MODE added to SOQL
-  • DML updated with 'as user'
-  • 'with sharing' added to class
-  • 'global' replaced with 'public'
-```
+- Open a file you want to Apexorcise
+- Open the Command Pallette (Shift + Command + P)
+- Type "Apexorcise"
 
 ## Example
 
