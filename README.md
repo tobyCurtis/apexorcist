@@ -1,65 +1,127 @@
-# apexorcist README
+# Apexorcist
 
-This is the README for your extension "apexorcist". After writing up a brief description, we recommend including the following sections.
+Banishes evil code like a security exorcist. Fixes basic security vulnerabilities that would be found from static code analysis.
 
-## Features
+## Overview
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+There are a number of findings in Checkmarx which we can fix with regex-based find and replaces. This Node.js script modifies Apex class files to enforce Salesforce security and access best practices by applying the following transformations:
 
-For example if there is an image subfolder under your extension project workspace:
+- **Adds `WITH USER_MODE`** to SOQL queries – Ensures SOQL queries execute in user context rather than system context where applicable.
+- **Appends `as user`** to DML operations – Ensures data manipulation respects user permissions.
+- **Adds `with sharing`** to class definitions – Enforces role-based record sharing unless already specified.
+- **Replaces `global` with `public`** – Restricts access to Apex classes and members, unless the class is a `@RestResource`.
 
-\!\[feature X\]\(images/feature-x.png\)
+These changes help align Apex code with secure development practices and help us avoid Checkmarx findings.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## What It Does
 
-## Requirements
+### 1. Inserts `WITH USER_MODE` in SOQL
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Finds all SOQL queries (`[SELECT ...]`)
+- Adds `WITH USER_MODE` after `WHERE` clauses and before any following clauses like `LIMIT`, `ORDER BY`, etc.
+- Leaves queries unchanged if:
+  - They don’t use `SELECT`
+  - They already contain `WITH USER_MODE`
 
-## Extension Settings
+### 2. Appends `as user` to DML
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- Transforms DML statements (`insert`, `update`, `delete`, etc.) to use `as user`
+- Skips statements that already include `as user`
 
-For example:
+### 3. Adds `with sharing` to Classes
 
-This extension contributes the following settings:
+- Adds `with sharing` before the `class` keyword
+- Skips if the class already has `with sharing` or `without sharing`
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### 4. Replaces `global` with `public`
 
-## Known Issues
+- Replaces `global` access modifiers with `public`
+- Skips this replacement if the file contains a `@RestResource` decorator
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## What It Does **Not** Do
 
-## Release Notes
+- It does **not** parse the Apex syntax using an AST (Abstract Syntax Tree); it relies on regex-based replacements, which may fail in edge cases like:
+  - Multi-line strings
+  - Comments containing keywords
+  - Complex nested queries or dynamic Apex
+- It does **not** process multiple files—only a single file specified by the `filePath`
+- It does **not** validate whether the modified Apex compiles or functions as expected in Salesforce
+- It does **not** fix Checkmarx issues on non-Apex classes or triggers
+- It does **not** fix methods which return a value to Visualforce pages without using a `Describe` call to check for field accessibility
 
-Users appreciate release notes as you update your extension.
+## How to Use
 
-### 1.0.0
+### 1. Download the Script
 
-Initial release of ...
+`fixApexCheckmarxFindings.js`
 
-### 1.0.1
+### 2. Add It to the Folder with Your Source
 
-Fixed issue #.
+Put it in whatever folder you are trying to fix source on, such as:
 
-### 1.1.0
+```
+force-app/main/default/classes
+force-app/main/default/triggers
+```
 
-Added features X, Y, and Z.
+[Download Script](https://confluenceent.cms.gov/download/attachments/1015896128/fixApexCheckmarxFindings.js?version=1&modificationDate=1747265929067&api=v2)
 
----
+### 3. Set the Path to Your Apex File
 
-## Working with Markdown
+At the top of the script, update:
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+```js
+const filePath = 'cmsMyRequests.cls';
+```
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+Replace `'cmsMyRequests.cls'` with the path to your file.
 
-## For more information
+### 4. Run the Script
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+In your terminal, navigate to the folder containing the script and run:
 
-**Enjoy!**
+```bash
+node fixApexCheckmarxFindings.js
+```
+
+### 5. Output
+
+On successful execution, you'll see something like:
+
+```
+cmsMyRequests.cls updated:
+  • WITH USER_MODE added to SOQL
+  • DML updated with 'as user'
+  • 'with sharing' added to class
+  • 'global' replaced with 'public'
+```
+
+## Example
+
+### Before:
+
+```apex
+global class MyController {
+    global void updateRecords(List<Account> accs) {
+        update accs;
+    }
+
+    void queryStuff() {
+        List<Account> a = [SELECT Id FROM Account WHERE Name != null LIMIT 10];
+    }
+}
+```
+
+### After:
+
+```apex
+public with sharing class MyController {
+    public void updateRecords(List<Account> accs) {
+        update as user accs;
+    }
+
+    void queryStuff() {
+        List<Account> a = [SELECT Id FROM Account WHERE Name != null WITH USER_MODE LIMIT 10];
+    }
+}
+```
