@@ -1,24 +1,24 @@
 const vscode = require("vscode");
-const TheWolf = require("./lib/TheWolf.js")
+const TheWolf = require("./lib/TheWolf.js");
+const crypto = require('crypto');
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-  console.log("Apexorcist activated");
-
   const disposable = vscode.commands.registerCommand(
     "apexorcist.run",
     function () {
-      const code = new TheWolf(vscode.window.activeTextEditor.document.getText())
+      const editorText = vscode.window.activeTextEditsor.document.getText();
+      const code = new TheWolf(editorText)
         .soqlWithUser()
         .dmlAsUser()
-		.withSharing()
-		.globalToPublic()
+        .withSharing()
+        .globalToPublic()
         .value();
 
       writeToDocument(code);
-      vscode.window.showInformationMessage("Hello World from Apexorcist! 3");
+      vscode.window.showInformationMessage(pickRandom(resultMessages));
     }
   );
 
@@ -43,6 +43,21 @@ function writeToDocument(newCode) {
   });
 }
 
+function pickRandom(arr) {
+  if (arr.length === 0) return undefined;
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return arr[array[0] % arr.length];
+}
+
+const resultMessages = [
+  "By the power of Chris Peterson, the demons have been cast out.",
+  "It is done. May peace now dwell where evil once lingered.",
+  "Go now in grace. The demons have been banished.",
+  "Next time, call me before the furniture starts flying.",
+  "The darkness is gone—for now.",
+];
+
 module.exports = {
-  activate
+  activate,
 };

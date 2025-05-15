@@ -9,6 +9,8 @@
   "categories": [
     "Other"
   ],
+  "icon": "icon.png",
+  "repository": "https://github.com/tobyCurtis/apexorcist",
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
