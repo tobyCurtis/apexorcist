@@ -1,6 +1,10 @@
-# Apexorcist
-
+<!-- # Apexorcist -->
+<p align="center">
+  <img src="banner.png" alt="Description" width="350"/>
+</p>
+<hr/>
 Banishes evil code like a security exorcist. Fixes basic security vulnerabilities that would be found from static code analysis.
+
 
 ## Overview
 

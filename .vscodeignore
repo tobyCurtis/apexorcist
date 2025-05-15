@@ -9,3 +9,5 @@ vsc-extension-quickstart.md
 **/eslint.config.mjs
 **/.vscode-test.*
 icon_original.png
+banner.png
+header.png
