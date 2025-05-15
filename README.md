@@ -44,7 +44,6 @@ These changes help align Apex code with secure development practices and help us
   - Multi-line strings
   - Comments containing keywords
   - Complex nested queries or dynamic Apex
-- It does **not** process multiple files—only a single file specified by the `filePath`
 - It does **not** validate whether the modified Apex compiles or functions as expected in Salesforce
 - It does **not** fix Checkmarx issues on non-Apex classes or triggers
 - It does **not** fix methods which return a value to Visualforce pages without using a `Describe` call to check for field accessibility
