@@ -9,7 +9,7 @@ function activate(context) {
   const disposable = vscode.commands.registerCommand(
     "apexorcist.run",
     function () {
-      const editorText = vscode.window.activeTextEditsor.document.getText();
+      const editorText = vscode.window.activeTextEditor.document.getText();
       const code = new TheWolf(editorText)
         .soqlWithUser()
         .dmlAsUser()
