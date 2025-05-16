@@ -8,7 +8,7 @@ Banishes evil code like a security exorcist. Fixes basic security vulnerabilitie
 
 ## Overview
 
-There are a number of findings in Checkmarx which we can fix with regex-based find and replaces. This Node.js script modifies Apex class files to enforce Salesforce security and access best practices by applying the following transformations:
+There are a number of findings in Checkmarx which we can fix with regex-based find and replaces. This VSCode extension Apexorcises (modifies) Apex class files to enforce Salesforce security and access best practices by applying the following transformations:
 
 - **Adds `WITH USER_MODE`** to SOQL queries – Ensures SOQL queries execute in user context rather than system context where applicable.
 - **Appends `as user`** to DML operations – Ensures data manipulation respects user permissions.
