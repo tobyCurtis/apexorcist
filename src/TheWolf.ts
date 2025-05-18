@@ -1,13 +1,13 @@
-class TheWolf {
-  constructor(code) {
+export class TheWolf {
+  code: string;
+
+  constructor(code: string) {
     console.log("I'm Winston Wolf. I solve problems.");
     this.code = code;
   }
 
   soqlWithUser() {
-    console.log("If I'm curt with you, it's because time is a factor.");
-    // Clause keywords that come after WHERE
-    const clauseKeywords = [
+    const clauseKeywords: string[] = [
       "GROUP BY",
       "ORDER BY",
       "LIMIT",
@@ -16,31 +16,41 @@ class TheWolf {
       "UPDATE",
       "FOR UPDATE",
     ];
-    const clauseRegex = clauseKeywords
-      .map((k) => k.replace(" ", "\\s+"))
-      .join("|");
+    const clauseRegex = clauseKeywords.map((k) => k.replace(" ", "\\s+")).join("|");
 
-    // Insert WITH USER_MODE in SOQL queries
     const queryRegex = /\[([\s\S]*?)\]/g;
     this.code = this.code.replace(queryRegex, (match, query) => {
       if (!/SELECT\b/i.test(query) || /WITH\s+USER_MODE/i.test(query)) {
         return `[${query}]`;
       }
 
-      const regex = new RegExp(
+      // Add WITH USER_MODE after WHERE but before next clause
+      const whereToClauseRegex = new RegExp(
         `(\\bWHERE\\b[\\s\\S]*?)(?=\\b(${clauseRegex})\\b)`,
         "i"
       );
-      if (regex.test(query)) {
-        return `[${query.replace(regex, `$1 WITH USER_MODE `)}]`;
+      if (whereToClauseRegex.test(query)) {
+        return `[${query.replace(whereToClauseRegex, (_: unknown, whereClause: string) =>
+          whereClause.trimEnd() + " WITH USER_MODE "
+        )}]`;
       }
 
-      const whereEndRegex = /(\bWHERE\b[\s\S]*?)(?=\s*$)/i;
-      if (whereEndRegex.test(query)) {
-        return `[${query.replace(whereEndRegex, `$1 WITH USER_MODE `)}]`;
+      // Add WITH USER_MODE at end of WHERE clause if it's the last clause
+      const whereToEndRegex = /(\bWHERE\b[\s\S]*?)$/i;
+      if (whereToEndRegex.test(query)) {
+        return `[${query.replace(whereToEndRegex, (_: unknown, whereClause: string) =>
+          whereClause.trimEnd() + " WITH USER_MODE"
+        )}]`;
       }
 
-      return `[${query}]`;
+      // Fallback: Add WITH USER_MODE at the end or before any clause keyword
+      const insertBeforeClauseRegex = new RegExp(`\\b(${clauseRegex})\\b`, "i");
+      if (insertBeforeClauseRegex.test(query)) {
+        return `[${query.replace(insertBeforeClauseRegex, "WITH USER_MODE $1")}]`;
+      }
+
+      // No WHERE, no clauses — just add it at the end
+      return `[${query.trimEnd()} WITH USER_MODE]`;
     });
 
     return this;
@@ -108,5 +118,3 @@ class TheWolf {
     return this.code;
   }
 }
-
-module.exports = TheWolf;
